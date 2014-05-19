@@ -26,6 +26,9 @@ class Model(object):
                 self.grid[c] == self.grid[square])
             
     def set_square(self, square):
+        if self.grid[square] != 2:
+            return False
+        
         event = Event()
         event.type = Event.SET_SQUARE
         event.square = square 
@@ -40,6 +43,7 @@ class Model(object):
             self.state = Model.DRAW 
                 
         self.notifyObservers(event)
+        return True
 
     def reset(self):
         self.to_play = (self.to_play + 1) % 2
@@ -65,5 +69,6 @@ class Model(object):
         print ("Created model")
         self.observers = []
         
+        self.state = Model.TO_PLAY 
         self.to_play = Model.X
         self.grid = [2,2,2,2,2,2,2,2,2]

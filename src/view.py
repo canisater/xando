@@ -8,7 +8,7 @@ class View():
     '''
     classdocs
     '''
-    
+    status = ["DRAW", "WIN", "TO PLAY"]
     def __init__(self, model, controller):
         '''
         Constructor
@@ -26,6 +26,7 @@ class ShellView(View):
     '''
     def start(self):
         View.start(self)
+        print (View.status[self.model.state])
            
  
 class GUIView(View):
