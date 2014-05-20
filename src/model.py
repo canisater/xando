@@ -39,7 +39,7 @@ class Model(object):
             if self.check_line(square, line):
                 self.state = Model.WIN    
 
-        if self.grid.count('2') == 0:
+        if self.grid.count(2) == 0:
             self.state = Model.DRAW 
                 
         self.notifyObservers(event)
