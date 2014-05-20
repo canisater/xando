@@ -35,7 +35,7 @@ class Model(object):
 
         self.grid[square] = self.to_play    
         
-        for line in lines:
+        for line in Model.lines:
             if self.check_line(square, line):
                 self.state = Model.WIN    
 
@@ -56,7 +56,7 @@ class Model(object):
         self.notifyObservers(event)
 
     def register(self, observer):
-        self.observers.append(observer)
+        self.observers.add(observer)
  
     def notifyObservers(self, event):
         for o in self.observers:
@@ -67,7 +67,7 @@ class Model(object):
         Constructor
         '''
         print ("Created model")
-        self.observers = []
+        self.observers = set()
         
         self.state = Model.TO_PLAY 
         self.to_play = Model.X

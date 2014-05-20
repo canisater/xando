@@ -3,24 +3,76 @@ Created on 19 May 2014
 
 @author: canisater
 '''
+
 import unittest
+from unittest.mock import Mock
 import model
 
 class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.m = model()
+        self.m = model.Model()
 
 
     def tearDown(self):
         pass
 
 
-    def testName(self):
-        pass
+    def test_initialisation(self):
+        # Assert initial state 
+        self.assertEqual(self.m.grid, [2,2,2,2,2,2,2,2,2], "Invalid initial grid")
+        self.assertEqual(self.m.state, model.Model.TO_PLAY, "Invalid initial state")
+        self.assertEqual(self.m.to_play, model.Model.X, "Invalid initial 'to play'")
 
-
+    def test_register_notify(self): 
+        # Set up some mock observers
+        mock_observer_1 = Mock()
+        mock_observer_2 = Mock()
+        
+        # Assert there none registered 
+        self.assertEqual(self.m.observers, set(), "Invalid initial observer list")
+       
+        # Add observers and assert they are there
+        self.m.register(mock_observer_1)
+        self.assertSetEqual(self.m.observers, {mock_observer_1}, "Observer not added correctly")
+        
+        self.m.register(mock_observer_2)
+        self.assertSetEqual(self.m.observers, {mock_observer_1, mock_observer_2}, "Observer not added correctly")
+       
+        # Try and add the same one twice
+        self.m.register(mock_observer_2)
+        self.assertSetEqual(self.m.observers, {mock_observer_1, mock_observer_2}, "Same observers added twice")
+        
+        # Call reset
+        self.m.reset()
+        
+        # Make sure the right calls were made
+        # 'method_calls' is a list of 'call' objects
+        mo1_calls = mock_observer_1.method_calls
+        mo2_calls = mock_observer_2.method_calls
+        self.assertListEqual(mo1_calls, mo2_calls, "Not all observers got notified")
+        
+        self.assertEqual(len(mo1_calls), 1, "Invalid number of notify calls made")
+        name, args, kwargs = mo1_calls[0]
+        
+        self.assertEqual(name, 'notify', 'Wrong notify method called')
+        self.assertEqual(len(args),1,'Wrong number of args passed to notify method')
+        self.assertEqual(len(kwargs),0,'Too many args passed to notify method')
+        
+        self.assertTrue(isinstance(args[0], model.Event), 'Wrong argument type')       
+    
+    def test_reset(self):
+        # Call 'reset()' and check results 
+        self.m.reset()
+        self.assertEqual(self.m.grid, [2,2,2,2,2,2,2,2,2], "Invalid initial grid")
+        self.assertEqual(self.m.state, model.Model.TO_PLAY, "Invalid initial state")
+        self.assertEqual(self.m.to_play, model.Model.Y, "Invalid initial 'to play' not toggled")
+        # Call 'reset()' again and check to_play has toggled OK  
+        self.m.reset()
+        self.assertEqual(self.m.to_play, model.Model.X, "Invalid initial 'to play' not toggled")
+     
+           
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
