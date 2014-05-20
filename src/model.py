@@ -8,7 +8,7 @@ class Event():
     '''
     classdocs
     '''
-    RESET = 0
+    (RESET, SET_SQUARE) = (0, 1)
     
 
 class Model(object):
@@ -36,7 +36,7 @@ class Model(object):
         self.grid[square] = self.to_play    
         
         for line in Model.lines:
-            if self.check_line(square, line):
+            if self.check_line(square, *line):
                 self.state = Model.WIN    
 
         if self.grid.count(2) == 0:

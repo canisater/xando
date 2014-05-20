@@ -16,3 +16,6 @@ class Controller(object):
         '''
         print ("Created controller")
         self.model = model
+    
+    def reset(self):
+        self.model.reset()    

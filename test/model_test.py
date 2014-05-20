@@ -60,8 +60,16 @@ class Test(unittest.TestCase):
         self.assertEqual(len(args),1,'Wrong number of args passed to notify method')
         self.assertEqual(len(kwargs),0,'Too many args passed to notify method')
         
-        self.assertTrue(isinstance(args[0], model.Event), 'Wrong argument type')       
-    
+        self.assertTrue(isinstance(args[0], model.Event), 'Wrong argument type')
+               
+    def test_check_line(self):
+        self.m.grid = [1,1,1,1,2,2,0,0,0]
+        lines = ((0,0,1,2,True), (3,3,4,5,False), (6,6,7,8,True), (3,0,3,6,False),
+                 (4,1,4,7,False), (8,2,5,8,False), (4,0,4,8,False), (6,2,4,6,False))
+        for line in lines:
+            s,a,b,c,r = line
+            self.assertEqual(self.m.check_line(s, a, b, c), r, "Check line failed {}{}{}{}{}".format(*line))
+         
     def test_reset(self):
         # Call 'reset()' and check results 
         self.m.reset()
@@ -72,7 +80,16 @@ class Test(unittest.TestCase):
         self.m.reset()
         self.assertEqual(self.m.to_play, model.Model.X, "Invalid initial 'to play' not toggled")
      
-           
+    def test_set_square_Xwin(self):
+        self.assertTrue(self.m.set_square(0), "Set square failed")
+        self.assertEqual(self.m.to_play, model.Model.X , "Set square failed invalid 'to_play'") 
+        self.assertFalse(self.m.set_square(0), "Set square failed - duplicate not rejected")
+        self.m.set_square(3)
+        self.m.set_square(1)
+        self.m.set_square(4)
+        self.m.set_square(2)
+        self.assertEqual(self.m.state, model.Model.WIN, "Set square failed invalid 'to_play'")
+              
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

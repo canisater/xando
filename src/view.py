@@ -8,7 +8,9 @@ class View():
     '''
     classdocs
     '''
-    status = ["DRAW", "WIN", "TO PLAY"]
+    status = ["Draw", "Win", "to play"]
+    to_play = ["X", "Y", " "]
+    
     def __init__(self, model, controller):
         '''
         Constructor
@@ -24,10 +26,23 @@ class ShellView(View):
     '''
     classdocs
     '''
+    BOARD = '''
+     {} | {} | {}
+    ---+---+---
+     {} | {} | {}
+    ---+---+---
+     {} | {} | {}
+    '''
     def start(self):
         View.start(self)
-        print (View.status[self.model.state])
-           
+        print ("    ",View.to_play[self.model.to_play], View.status[self.model.state])                
+        print (ShellView.BOARD.format(*(View.to_play[i] for i in self.model.grid)))
+        self.controller.reset()
+        
+    def notify(self, event):
+        print ("    ",View.to_play[self.model.to_play], View.status[self.model.state])                
+        print (ShellView.BOARD.format(*(View.to_play[i] for i in self.model.grid)))
+      
  
 class GUIView(View):
     '''
