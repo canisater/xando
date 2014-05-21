@@ -18,4 +18,10 @@ class Controller(object):
         self.model = model
     
     def reset(self):
-        self.model.reset()    
+        self.model.reset()   
+    
+    def set_square(self, square):
+        if square not in '012345678':
+            return False
+        
+        return self.model.set_square(int(square))       

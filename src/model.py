@@ -3,22 +3,49 @@ Created on 19 May 2014
 
 @author: canisater
 '''
+from enum import Enum
 
-class Event():
+class Event(Enum):
     '''
     classdocs
     '''
     (RESET, SET_SQUARE) = (0, 1)
-    
 
+class State(Enum):
+    '''
+    classdocs
+    '''    
+    (DRAW, WIN, TO_PLAY) = 0,1,2
+   
+    def description(self, 
+                    desc={DRAW: 'Draw', 
+                          WIN: 'Win', 
+                          TO_PLAY: 'To play'}):
+        return desc[self.value]
+
+ 
+class Player(Enum):
+    '''
+    classdocs
+    '''    
+    (X, O, NO_PLAYER) = 0,1,2
+    
+    def description(self, 
+                    desc={X: 'X', 
+                          O: 'O', 
+                          NO_PLAYER: ' '}):
+        return desc[self.value]
+   
+    
 class Model(object):
     '''
     classdocs
     '''
-    (DRAW, WIN, TO_PLAY) = 0,1,2
-    (X, Y) = 0,1  
+    INITIAL_GRID = [Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER,
+                    Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER,
+                    Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER,]  
     
-    lines = ((0,1,2), (3,4,5), (6,7,8), (0,3,6),
+    LINES = ((0,1,2), (3,4,5), (6,7,8), (0,3,6),
              (1,4,7), (2,5,8), (0,4,8), (2,4,6))
     
     def check_line(self, square, a, b, c, ):
@@ -26,34 +53,32 @@ class Model(object):
                 self.grid[c] == self.grid[square])
             
     def set_square(self, square):
-        if self.grid[square] != 2:
+        if self.grid[square] != Player.NO_PLAYER:
             return False
         
-        event = Event()
-        event.type = Event.SET_SQUARE
+        event = Event.SET_SQUARE
         event.square = square 
 
         self.grid[square] = self.to_play    
         
-        for line in Model.lines:
+        for line in Model.LINES:
             if self.check_line(square, *line):
-                self.state = Model.WIN    
+                self.state = State.WIN    
 
-        if self.grid.count(2) == 0:
-            self.state = Model.DRAW 
-                
+        if self.state != State.WIN and self.grid.count(Player.NO_PLAYER) == 0:
+            self.state = State.DRAW 
+        
+        # Toggle player    
+        self.to_play = Player((self.to_play.value + 1) % 2)        
         self.notifyObservers(event)
         return True
 
     def reset(self):
-        self.to_play = (self.to_play + 1) % 2
-        self.state = Model.TO_PLAY
-        self.grid = [2,2,2,2,2,2,2,2,2]
+        
+        self.state = State.TO_PLAY
+        self.grid = Model.INITIAL_GRID[:]
 
-        event = Event()
-        event.type = Event.RESET 
-
-        self.notifyObservers(event)
+        self.notifyObservers(Event.RESET)
 
     def register(self, observer):
         self.observers.add(observer)
@@ -69,6 +94,6 @@ class Model(object):
         print ("Created model")
         self.observers = set()
         
-        self.state = Model.TO_PLAY 
-        self.to_play = Model.X
-        self.grid = [2,2,2,2,2,2,2,2,2]
+        self.state = State.TO_PLAY 
+        self.to_play = Player.X
+        self.grid = Model.INITIAL_GRID[:]

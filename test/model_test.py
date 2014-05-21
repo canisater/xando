@@ -21,9 +21,9 @@ class Test(unittest.TestCase):
 
     def test_initialisation(self):
         # Assert initial state 
-        self.assertEqual(self.m.grid, [2,2,2,2,2,2,2,2,2], "Invalid initial grid")
-        self.assertEqual(self.m.state, model.Model.TO_PLAY, "Invalid initial state")
-        self.assertEqual(self.m.to_play, model.Model.X, "Invalid initial 'to play'")
+        self.assertEqual(self.m.grid, model.Model.INITIAL_GRID, "Invalid initial grid")
+        self.assertEqual(self.m.state, model.State.TO_PLAY, "Invalid initial state")
+        self.assertEqual(self.m.to_play, model.Player.X, "Invalid initial 'to play'")
 
     def test_register_notify(self): 
         # Set up some mock observers
@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(args[0], model.Event), 'Wrong argument type')
                
     def test_check_line(self):
-        self.m.grid = [1,1,1,1,2,2,0,0,0]
+        self.m.grid = [model.Player(p) for p in [1,1,1,1,2,2,0,0,0]]
         lines = ((0,0,1,2,True), (3,3,4,5,False), (6,6,7,8,True), (3,0,3,6,False),
                  (4,1,4,7,False), (8,2,5,8,False), (4,0,4,8,False), (6,2,4,6,False))
         for line in lines:
@@ -73,22 +73,31 @@ class Test(unittest.TestCase):
     def test_reset(self):
         # Call 'reset()' and check results 
         self.m.reset()
-        self.assertEqual(self.m.grid, [2,2,2,2,2,2,2,2,2], "Invalid initial grid")
-        self.assertEqual(self.m.state, model.Model.TO_PLAY, "Invalid initial state")
-        self.assertEqual(self.m.to_play, model.Model.Y, "Invalid initial 'to play' not toggled")
-        # Call 'reset()' again and check to_play has toggled OK  
-        self.m.reset()
-        self.assertEqual(self.m.to_play, model.Model.X, "Invalid initial 'to play' not toggled")
+        self.assertEqual(self.m.grid, model.Model.INITIAL_GRID, "Invalid initial grid")
+        self.assertEqual(self.m.state, model.State.TO_PLAY, "Invalid initial state")
+        self.assertEqual(self.m.to_play, model.Player.X, "Invalid initial 'to play' not toggled")
      
     def test_set_square_Xwin(self):
         self.assertTrue(self.m.set_square(0), "Set square failed")
-        self.assertEqual(self.m.to_play, model.Model.X , "Set square failed invalid 'to_play'") 
+        self.assertEqual(self.m.to_play, model.Player.O , "Set square failed - invalid next player") 
         self.assertFalse(self.m.set_square(0), "Set square failed - duplicate not rejected")
         self.m.set_square(3)
         self.m.set_square(1)
         self.m.set_square(4)
         self.m.set_square(2)
-        self.assertEqual(self.m.state, model.Model.WIN, "Set square failed invalid 'to_play'")
+        self.assertEqual(self.m.state, model.State.WIN, "Set square failed - invalid state")
+
+    def test_set_square_draw(self):
+        self.m.set_square(0)
+        self.m.set_square(4)
+        self.m.set_square(6)
+        self.m.set_square(3)
+        self.m.set_square(5)
+        self.m.set_square(1)
+        self.m.set_square(7)
+        self.m.set_square(8)
+        self.m.set_square(2)
+        self.assertEqual(self.m.state, model.State.DRAW, "Set square failed - invalid state")
               
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
