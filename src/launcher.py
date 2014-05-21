@@ -22,6 +22,8 @@ if __name__ == '__main__':
     if option == 'CONSOLE':
         v = view.ShellView(m, c)
     else:
+        x = view.ShellView(m, c)
+        m.register(x)
         v = view.GUIView(m, c)
 
     v.start()

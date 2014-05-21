@@ -61,15 +61,37 @@ class ShellView(View):
             print (self.model.state.description())
         else: 
             print (self.model.grid[event.square].description(), self.model.state.description())
-                   
-        
-
-            
-   
  
-class GUIView(View):
-    '''
-    classdocs
-    '''
+class GUIView(View, tk.Frame):
+    def __init__(self, model, controller):
+        '''
+        Constructor
+        '''
+        View.__init__(self, model, controller)
+        tk.Frame.__init__(self, None)
+        self.add_widgets()
+        self.grid()
+    
+    def button_press(self,b):
+        print("Button", str(b))
+        self.controller.set_square(str(b))
+        
+    def add_widgets(self):
+        buttons = tk.Frame(self)
+        buttons.grid(row=0)
+        button_map = {}
+        for b in range(9):
+            button_map[b] = tk.Button(buttons,text=' ',command=(lambda b = b: self.button_press(b)))
+            button_map[b].grid(row=b//3, column=b%3)
+        
+        message = tk.Label(self,text="Some text")
+        message.grid(row=1)  
+       
+           
     def start(self):
         View.start(self)
+        self.mainloop()
+        
+    def notify(self, event):
+        print (event)    
+         
