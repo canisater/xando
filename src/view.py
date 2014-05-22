@@ -3,8 +3,9 @@ Created on 19 May 2014
 
 @author: canisater
 '''
-from model import State
+from model import State, Event
 import tkinter as tk
+import tkinter.font as tkFont
 class View():
     '''
     classdocs
@@ -77,15 +78,20 @@ class GUIView(View, tk.Frame):
         self.controller.set_square(str(b))
         
     def add_widgets(self):
-        buttons = tk.Frame(self)
-        buttons.grid(row=0)
-        button_map = {}
-        for b in range(9):
-            button_map[b] = tk.Button(buttons,text=' ',command=(lambda b = b: self.button_press(b)))
-            button_map[b].grid(row=b//3, column=b%3)
+        self.buttons = tk.Frame(self)
+        self.buttons.grid(row=0)
+        self.button_map = {}
+        courier = tkFont.Font(family="Courier",size=24,weight="bold")
         
-        message = tk.Label(self,text="Some text")
-        message.grid(row=1)  
+        for b in range(9):
+            self.button_map[b] = tk.Button(self.buttons,
+                                      text=' ',font=courier,
+                                      command=(lambda b = b: self.button_press(b)))
+            self.button_map[b].grid(row=b//3, column=b%3)
+            self.button_map[b].bind('<<Event>>',func=self.got_event)
+        
+        self.message = tk.Label(self,text="Some text")
+        self.message.grid(row=1)  
        
            
     def start(self):
@@ -93,5 +99,26 @@ class GUIView(View, tk.Frame):
         self.mainloop()
         
     def notify(self, event):
-        print (event)    
+        print (event)
+        
+        if event == Event.RESET:
+            for b in range(9):
+                self.button_map[b]['state'] = tk.NORMAL 
+                self.button_map[b]['text'] = ' '
+        else:
+            square = event.square        
+            self.button_map[square].event_generate('<<Event>>', when='tail')
+        
+             
+        if self.model.state == State.TO_PLAY:
+            self.message['text'] = '{}{}'.format(self.model.to_play.name, self.model.state.description())
+        elif self.model.state == State.DRAW:
+            self.message['text'] = '{}{}'.format(self.model.state.description())
+        else: 
+            self.message['text'] = '{}{}'.format(self.model.grid[event.square].description(), self.model.state.description())
+
+    
+    def got_event(self, tkevent):
+        tkevent.widget.configure(text='X')    
+            
          
