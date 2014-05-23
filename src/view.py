@@ -3,7 +3,7 @@ Created on 19 May 2014
 
 @author: canisater
 '''
-from model import State, Event
+from model import State, Event, Player
 import tkinter as tk
 import tkinter.font as tkFont
 class View():
@@ -88,27 +88,34 @@ class GUIView(View, tk.Frame):
                                       text=' ',font=courier,
                                       command=(lambda b = b: self.button_press(b)))
             self.button_map[b].grid(row=b//3, column=b%3)
-            self.button_map[b].bind('<<Event>>',func=self.got_event)
-        
-        self.message = tk.Label(self,text="Some text")
+            
+            # Bind some custom events to update the Button labels 
+            self.button_map[b].bind('<<Set-X>>',func=(lambda event: self.got_event(event,'X')))
+            self.button_map[b].bind('<<Set-O>>',func=(lambda event: self.got_event(event,'O')))
+            self.button_map[b].bind('<<Clear>>',func=(lambda event: self.got_event(event,' ')))
+            
+        self.message = tk.Label(self, text="X to play")
         self.message.grid(row=1)  
-       
+        self.playbutton = tk.Button(self, text='Play', state=tk.DISABLED, command=(self.controller.reset()))
+        self.playbutton.grid(row=2)
            
     def start(self):
         View.start(self)
         self.mainloop()
         
     def notify(self, event):
-        print (event)
-        
+        '''
+        '''
         if event == Event.RESET:
             for b in range(9):
                 self.button_map[b]['state'] = tk.NORMAL 
                 self.button_map[b]['text'] = ' '
         else:
-            square = event.square        
-            self.button_map[square].event_generate('<<Event>>', when='tail',data=square)
-        
+            square = event.square
+            if self.model.grid[square] ==  Player.X:  
+                self.button_map[square].event_generate('<<Set-X>>', when='tail')
+            else:    
+                self.button_map[square].event_generate('<<Set-O>>', when='tail')
              
         if self.model.state == State.TO_PLAY:
             self.message['text'] = '{} {}'.format(self.model.to_play.name, self.model.state.description())
@@ -119,14 +126,8 @@ class GUIView(View, tk.Frame):
                                                   self.model.state.description())
 
     
-    def got_event(self, tkevent):
-        tkevent.widget.configure(text='X')
-        print(dir(tkevent))
-        print(type(tkevent))
-        print(tkevent.send_event)
-        print(tkevent.type) 
-        print(tkevent.keycode)
-        print(tkevent.num)
-             
+    def got_event(self, tkevent, v):
+        tkevent.widget.configure(text=v, state=tk.DISABLED)
+                     
             
          
