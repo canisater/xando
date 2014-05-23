@@ -107,18 +107,26 @@ class GUIView(View, tk.Frame):
                 self.button_map[b]['text'] = ' '
         else:
             square = event.square        
-            self.button_map[square].event_generate('<<Event>>', when='tail')
+            self.button_map[square].event_generate('<<Event>>', when='tail',data=square)
         
              
         if self.model.state == State.TO_PLAY:
-            self.message['text'] = '{}{}'.format(self.model.to_play.name, self.model.state.description())
+            self.message['text'] = '{} {}'.format(self.model.to_play.name, self.model.state.description())
         elif self.model.state == State.DRAW:
-            self.message['text'] = '{}{}'.format(self.model.state.description())
+            self.message['text'] = '{}'.format(self.model.state.description())
         else: 
-            self.message['text'] = '{}{}'.format(self.model.grid[event.square].description(), self.model.state.description())
+            self.message['text'] = '{} {}'.format(self.model.grid[event.square].description(), 
+                                                  self.model.state.description())
 
     
     def got_event(self, tkevent):
-        tkevent.widget.configure(text='X')    
+        tkevent.widget.configure(text='X')
+        print(dir(tkevent))
+        print(type(tkevent))
+        print(tkevent.send_event)
+        print(tkevent.type) 
+        print(tkevent.keycode)
+        print(tkevent.num)
+             
             
          
