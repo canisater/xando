@@ -72,11 +72,7 @@ class GUIView(View, tk.Frame):
         tk.Frame.__init__(self, None)
         self.add_widgets()
         self.grid()
-    
-    def button_press(self,b):
-        print("Button", str(b))
-        self.controller.set_square(str(b))
-        
+  
     def add_widgets(self):
         self.buttons = tk.Frame(self)
         self.buttons.grid(row=0)
@@ -86,18 +82,27 @@ class GUIView(View, tk.Frame):
         for b in range(9):
             self.button_map[b] = tk.Button(self.buttons,
                                       text=' ',font=courier,
-                                      command=(lambda b = b: self.button_press(b)))
+                                      command=(lambda b = b: self.controller.set_square(str(b))))
             self.button_map[b].grid(row=b//3, column=b%3)
             
             # Bind some custom events to update the Button labels 
-            self.button_map[b].bind('<<Set-X>>',func=(lambda event: self.got_event(event,'X')))
-            self.button_map[b].bind('<<Set-O>>',func=(lambda event: self.got_event(event,'O')))
-            self.button_map[b].bind('<<Clear>>',func=(lambda event: self.got_event(event,' ')))
+            self.button_map[b].bind('<<Set-X>>',func=(lambda event: event.widget.configure(text='X', state=tk.DISABLED)))
+            self.button_map[b].bind('<<Set-O>>',func=(lambda event: event.widget.configure(text='O', state=tk.DISABLED)))
+            self.button_map[b].bind('<<Clear>>',func=(lambda event: event.widget.configure(text=' ', state=tk.NORMAL)))
+            self.button_map[b].bind('<<Disable>>',func=(lambda event: event.widget.configure(state=tk.DISABLED)))
             
         self.message = tk.Label(self, text="X to play")
-        self.message.grid(row=1)  
-        self.playbutton = tk.Button(self, text='Play', state=tk.DISABLED, command=(self.controller.reset()))
+        self.message.grid(row=1) 
+        self.message.bind('<<Draw-Msg>>',func=(lambda event: event.widget.configure(text='Draw')))
+        self.message.bind('<<XWin-Msg>>',func=(lambda event: event.widget.configure(text='X win')))
+        self.message.bind('<<OWin-Msg>>',func=(lambda event: event.widget.configure(text='O win')))
+        self.message.bind('<<XTurn-Msg>>',func=(lambda event: event.widget.configure(text='X to play')))
+        self.message.bind('<<OTurn-Msg>>',func=(lambda event: event.widget.configure(text='O to play')))
+         
+        self.playbutton = tk.Button(self, text='Play', state=tk.DISABLED, command=(lambda: self.controller.reset()))
         self.playbutton.grid(row=2)
+        self.playbutton.bind('<<Disable-Play>>',func=(lambda event: event.widget.configure(state=tk.DISABLED)))
+        self.playbutton.bind('<<Enable-Play>>',func=(lambda event: event.widget.configure(state=tk.NORMAL)))
            
     def start(self):
         View.start(self)
@@ -108,8 +113,10 @@ class GUIView(View, tk.Frame):
         '''
         if event == Event.RESET:
             for b in range(9):
-                self.button_map[b]['state'] = tk.NORMAL 
-                self.button_map[b]['text'] = ' '
+                self.button_map[b].event_generate('<<Clear>>', when='tail') 
+        
+            self.playbutton.event_generate('<<Disable-Play>>',when='tail')
+        
         else:
             square = event.square
             if self.model.grid[square] ==  Player.X:  
@@ -118,16 +125,25 @@ class GUIView(View, tk.Frame):
                 self.button_map[square].event_generate('<<Set-O>>', when='tail')
              
         if self.model.state == State.TO_PLAY:
-            self.message['text'] = '{} {}'.format(self.model.to_play.name, self.model.state.description())
-        elif self.model.state == State.DRAW:
-            self.message['text'] = '{}'.format(self.model.state.description())
-        else: 
-            self.message['text'] = '{} {}'.format(self.model.grid[event.square].description(), 
-                                                  self.model.state.description())
+            if self.model.to_play == Player.X:
+                self.message.event_generate('<<XTurn-Msg>>', when='tail')
+            else:
+                self.message.event_generate('<<OTurn-Msg>>', when='tail')    
+        else:
+            self.playbutton.event_generate('<<Enable-Play>>',when='tail')
+            for b in range(9):
+                self.button_map[b].event_generate('<<Disable>>', when='tail') 
+                
+            if self.model.state == State.DRAW:
+                self.message.event_generate('<<Draw-Msg>>', when='tail')
+            else: 
+                if self.model.grid[square] == Player.X:
+                    self.message.event_generate('<<XWin-Msg>>', when='tail')
+                else:
+                    self.message.event_generate('<<OWin-Msg>>', when='tail')    
 
+            
     
-    def got_event(self, tkevent, v):
-        tkevent.widget.configure(text=v, state=tk.DISABLED)
                      
             
          
