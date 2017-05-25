@@ -8,22 +8,25 @@ import sys
 import model
 import view
 import controller
+import argparse
 
 if __name__ == '__main__':
 
-    if len(sys.argv) > 1:
-        option = sys.argv[1].upper()
-    else:
-        option = 'CONSOLE'
+    parser = argparse.ArgParser(description='"X" and "O" game')
+    parser.add_argument('-g','--gui', help='Use Tk inter GUI',
+                        action='store_true') 
 
+    args = parser.parse_args()
+    
     m = model.Model()
     c = controller.Controller(m)
     
-    if option == 'CONSOLE':
-        v = view.ShellView(m, c)
-    else:
+    if args.gui:
         x = view.ShellView(m, c)
         m.register(x)
         v = view.GUIView(m, c)
+        
+    else:
+        v = view.ShellView(m, c)
 
     v.start()
