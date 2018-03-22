@@ -12,7 +12,7 @@ import argparse
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgParser(description='"X" and "O" game')
+    parser = argparse.ArgumentParser(description='"X" and "O" game')
     parser.add_argument('-g','--gui', help='Use Tk inter GUI',
                         action='store_true') 
 
